@@ -1,0 +1,20 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: test-service
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        ip-address: ${HOST_ADDRESS:localhost}
+        port: ${SERVER_PORT:${server.port}}
+        healthCheckInterval: 5s
+        instance-id: testService-${server.port}
+        service-name: testService
+
+management:
+  security:
+    enabled: false

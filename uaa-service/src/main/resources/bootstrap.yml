@@ -1,0 +1,20 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: uaa-service
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        ip-address: ${HOST_ADDRESS:localhost}
+        port: ${SERVER_PORT:${server.port}}
+        healthCheckInterval: 5s
+        instance-id: UaaService-${server.port}
+        service-name: userService
+
+management:
+  security:
+    enabled: false
