@@ -23,9 +23,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 import com.netflix.zuul.ZuulFilter;
+import com.rsoft.gw.filter.post.ApiKeyGenerateFilter;
 import com.rsoft.gw.filter.pre.ApiKeyFilter;
 import com.rsoft.gw.support.auth.ApiKeyProperties;
 
@@ -36,11 +39,18 @@ import com.rsoft.gw.support.auth.ApiKeyProperties;
 @EnableConfigurationProperties(ApiKeyProperties.class)
 @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
 public class ApiKeyAutoConfiguration {
-    private final UrlPathHelper urlPathHelper = new UrlPathHelper();
-
+    private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
+    private static final PathMatcher pathMatcher = new AntPathMatcher();
+    
     @Bean
-    public ZuulFilter rateLimiterPreFilter(final ApiKeyProperties properties,
+    public ZuulFilter apiKeyFilter(final ApiKeyProperties properties,
                                            final RouteLocator routeLocator) {
-        return new ApiKeyFilter(properties, routeLocator, urlPathHelper);
+        return new ApiKeyFilter(properties, routeLocator, urlPathHelper, pathMatcher);
+    }
+    
+    @Bean
+    public ZuulFilter apiKeyGenerateFilter(final ApiKeyProperties properties,
+                                           final RouteLocator routeLocator) {
+        return new ApiKeyGenerateFilter(properties, routeLocator, urlPathHelper, pathMatcher);
     }
 }

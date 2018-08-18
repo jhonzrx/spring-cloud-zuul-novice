@@ -1,5 +1,6 @@
 package com.rsoft.gw.support.auth;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -28,12 +29,14 @@ public class ApiKeyProperties {
     public static class ApiKeyConfig {
     	public static final String HEADER_PARAMETER_NAME = "x-token";
         private Algorithm alg = Algorithm.MD5;
+        private String authUrl;
         @NotNull
         private String salt;
         private String header = HEADER_PARAMETER_NAME;
         private long expires=300; //TimeUnit.SECONDS
         private String message="token unauthorized.";
-
+        private List<String> ignoreUrls;
+        
         public enum Algorithm {
             MD5,
             SHA

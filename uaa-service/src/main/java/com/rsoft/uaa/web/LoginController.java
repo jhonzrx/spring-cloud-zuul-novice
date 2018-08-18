@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,11 @@ public class LoginController {
 			return existed.getUserid();
 		}
 		return null;
+	}
+	
+	@GetMapping("/user")
+	public User getUser(String username){
+		return users.get(username);
 	}
 	
 	private static Map<String,User> users = new ConcurrentHashMap<String,User>();

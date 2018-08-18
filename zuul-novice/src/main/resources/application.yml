@@ -31,9 +31,13 @@ zuul:
         salt: 1234567890
         message: 服务忙,请稍后再试.
       uaa:
+        auth-url: /login
         alg: SHA
         expires: 60
         salt: abcdefghijk
+        ignore-urls:
+          - /login*
+          - /test
   
   # 请求限流
   ratelimit:
@@ -64,7 +68,11 @@ zuul:
       stripPrefix: true
     
     # 2.serviceId pattern
-    userService: /uaa/**
+    userService: /user/**
+    uaa:
+      path: /uaa/*
+      serviceId: userService
+      stripPrefix: true
     test:
       path: /test/*
       serviceId: testService

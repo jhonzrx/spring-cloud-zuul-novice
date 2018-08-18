@@ -9,5 +9,4 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface AuthService {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	String login(@RequestParam("username") String username, @RequestParam("password") String password);
-
 }

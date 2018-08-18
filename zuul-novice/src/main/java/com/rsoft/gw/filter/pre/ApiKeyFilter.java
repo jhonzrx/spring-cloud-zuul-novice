@@ -3,12 +3,15 @@ package com.rsoft.gw.filter.pre;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.FORM_BODY_WRAPPER_FILTER_ORDER;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.netflix.zuul.filters.Route;
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 import com.netflix.zuul.ZuulFilter;
@@ -27,6 +30,8 @@ public class ApiKeyFilter extends ZuulFilter{
 	private final ApiKeyProperties properties;
 	private final RouteLocator routeLocator;
     private final UrlPathHelper urlPathHelper;
+    private final PathMatcher pathMatcher;
+    
     @Override
     public Object run() {
         final RequestContext ctx = RequestContext.getCurrentContext();
@@ -35,6 +40,16 @@ public class ApiKeyFilter extends ZuulFilter{
         
         ApiKeyConfig cfg = this.getKeyConfig(route);
         if(cfg!=null) {
+        	List<String> ignoreUrls = cfg.getIgnoreUrls();
+        	if(ignoreUrls!=null && ignoreUrls.size()>0){
+        		final String routePath = route.getPath();
+        		for(String uri : ignoreUrls){
+        			if(pathMatcher.match(uri, routePath)){
+        				return null;
+        			}
+        		}
+        	}
+        	
             log.info(">>> ApiKeyFilter {},{}", request.getMethod(), request.getRequestURL().toString());
             String key = request.getHeader(cfg.getHeader());
             
