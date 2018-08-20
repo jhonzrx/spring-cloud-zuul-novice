@@ -49,7 +49,7 @@ public class ApiKeyGenerateFilter extends ZuulFilter {
 		final Route route = route();
 		return properties.isEnabled() && 
 				cfg != null && 
-				!cfg.getAuthUrl().isEmpty() && 
+				StringUtils.isNotBlank(cfg.getAuthUrl()) && 
 				pathMatcher.match(route.getPath(), cfg.getAuthUrl()
 		);
 	}

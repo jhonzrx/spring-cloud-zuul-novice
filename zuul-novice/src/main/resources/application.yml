@@ -29,16 +29,12 @@ zuul:
   apikey:
     enabled: true
     routes:
-      test:
-        alg: MD5
-        header: authkey
-        salt: 1234567890
-        message: 服务忙,请稍后再试.
       uaa:
         auth-url: /login
         alg: SHA
         expires: 60
         salt: abcdefghijk
+        message: 服务忙,请稍后再试.
         ignore-urls:
           - /login*
           - /test
