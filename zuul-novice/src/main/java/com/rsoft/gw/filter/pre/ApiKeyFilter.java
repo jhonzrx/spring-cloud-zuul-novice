@@ -8,8 +8,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.zuul.filters.Route;
 import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
@@ -27,10 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class ApiKeyFilter extends ZuulFilter{
+	public static final String API_KEY_REDIS_NS = "zuul:apikey:";
 	private final ApiKeyProperties properties;
 	private final RouteLocator routeLocator;
     private final UrlPathHelper urlPathHelper;
     private final PathMatcher pathMatcher;
+    
+    @Autowired
+	private StringRedisTemplate redisTemplate;
     
     @Override
     public Object run() {
@@ -56,18 +62,24 @@ public class ApiKeyFilter extends ZuulFilter{
             if(StringUtils.isBlank(key)){
             	writeResponse(ctx, cfg, false);
             }
+            
+            String uid = redisTemplate.opsForValue().get(API_KEY_REDIS_NS+key);
+            if(StringUtils.isBlank(uid)){
+            	writeResponse(ctx, cfg, false);
+            }
+            
             boolean success = false;
             Algorithm algr =  cfg.getAlg();
 			switch (algr) {
 			case MD5:
-				String md5Generated = EncryptUtil.md5(cfg.getSalt());
+				String md5Generated = EncryptUtil.md5(uid+cfg.getSalt());
 				log.debug("apikey={},generate md5={}",key, md5Generated);
 				if (md5Generated.equals(key)) {
 					success = true;
 				}
 				break;
 			case SHA:
-				String shaGenerated = EncryptUtil.sha(cfg.getSalt());
+				String shaGenerated = EncryptUtil.sha(uid+cfg.getSalt());
 				log.debug("apikey={},generate sha={}",key, shaGenerated);
 				if (shaGenerated.equals(key)) {
 					success = true;
