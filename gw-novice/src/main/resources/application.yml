@@ -1,0 +1,78 @@
+server: 
+  port: 8000
+  
+spring:
+  application:
+      name: gateway-novice
+  cloud:
+    consul:
+      #host: localhost
+      #port: 8500
+      discovery:
+        ip-address: ${HOST_ADDRESS:localhost}
+        port: ${SERVER_PORT:${server.port}}
+        healthCheckPath: /health
+        healthCheckInterval: 15s
+        service-name: gatewayNovice
+
+    gateway:
+      enabled: true
+      httpclient.connectTimeout: 99999
+      locator:
+        enabled: true
+      default-filters:
+      - AddResponseHeader=X-Response-TOKEN, x-token-s
+      - AddRequestHeader=X-Request-Name, Value
+      - AddRequestParameter=name, value
+      routes:
+      # =====================================
+      - id: test
+        uri: lb://testService
+        order: 1000
+        predicates:
+        - Path=/test/**
+        filters:
+        - StripPrefix=1
+      # =====================================
+      - id: uaa
+        uri: lb://USERSERVICE
+        order: 2000
+        predicates:
+        - Path=/uaa/**
+        filters:
+        - StripPrefix=1
+        - name: ApiKey
+          args:
+            auth-url: /login
+            alg: SHA
+            expires: 60
+            salt: abcdefghijk
+            message: 服务忙,请稍后再试.
+            ignore-urls:
+            - "/login*"
+            - /test
+            
+        #- name: RequestRateLimiter
+        #  args:
+        #    redis-rate-limiter.replenishRate: 1
+        #    redis-rate-limiter.burstCapacity: 2
+        #    key-resolver: "#{@ipKeyResolver}"
+          
+  # redis config
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.ipc.netty: INFO
+    
+hystrix.command.fallbackcmd.execution.isolation.thread.timeoutInMilliseconds: 5000
+
+management:
+  endpoints:
+    web:
+      exposure.include: bus-refresh,health,info
+      #cors.allowed-origins: http://example.com

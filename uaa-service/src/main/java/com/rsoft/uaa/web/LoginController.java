@@ -1,9 +1,17 @@
 package com.rsoft.uaa.web;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +24,10 @@ import com.rsoft.uaa.dto.User;
 public class LoginController {
 	
 	@PostMapping("/login")
-	public String login(@RequestBody User u){
+	public String login(@RequestBody User u, HttpServletResponse response){
 		User existed = users.get(u.getUsername());
 		if(existed != null && existed.getPassword().equals(u.getPassword())){
+			response.setHeader("_uid_", existed.getUserid());
 			return existed.getUserid();
 		}
 		return null;
